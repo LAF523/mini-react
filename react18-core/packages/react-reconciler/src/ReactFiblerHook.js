@@ -15,8 +15,8 @@ import {
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 // 当前正在渲染的fiber节点已经正在进行的hook
 let currentlyRenderingFiber = null;
-let workInProgressHook = null;
-let currentHook = null;
+let workInProgressHook = null; // 工作中的hook链表
+let currentHook = null; // 当前正在执行的hook
 const HooksDispatcherOnMount = {
   useReducer: mountedReducer,
   useState: mountUseState,
@@ -117,7 +117,7 @@ function updateEffectImpl(fiberFlags, hookFlags, create, nextDeps = null) {
     if (nextDeps !== null) {
       const prevDeps = prevEffect.deps;
       if (areHookInputsEqual(nextDeps, prevDeps)) {
-        // 检测依赖项有没有变化
+        // 检测依赖项有变化
         hook.memoizedState = pushEffect(hookFlags, create, destroy, nextDeps);
         return;
       }
@@ -258,7 +258,6 @@ function updateReducer(reducer) {
       const action = update.action;
       newState = reducer(newState, action); // 真正重新执行hook的地方
       update = update.next;
-      console.log(20);
     } while (update !== null && update !== firstUpdate);
   }
   hook.memoizedState = newState;

@@ -132,7 +132,7 @@ function workLoop() {
 }
 
 function shouldYieldToHost() {
-  // 是否应该交还主线程的控制权
+  // 是否还有空闲时间,如果有则继续执行,没有则中断执行
   const timeElapsed = Date.now() - startTime;
   if (timeElapsed < frameInterval) {
     return false;

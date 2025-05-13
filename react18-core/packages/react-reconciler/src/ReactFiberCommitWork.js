@@ -132,17 +132,20 @@ function insertOrAppendPlacementNode(finishedWork, before, parent) {
 function getHostSibling(finishedWork) {
   let node = finishedWork;
   siblings: while (true) {
-    console.log(9);
+    // 如果节点的兄弟节点为null,说明没有兄弟节点,则还需判断父节点为组件的情况,如果父节点为组件,则需要继续向上查找,因为组件没有对应真实DOM
+    // 如果父节点是host,说明该host中只有当前节点一个元素,不需要查找锚点
     while (node.sibling === null) {
       console.log(10);
 
-      // 如果没有兄弟节点,则往父节点找,直到父节点的兄弟节点不为null
+      // 父节点为空说明当前是根节点,如果父节点是个有真实DOM的fiber
+      //
       if (node.return === null || isHost(node.return)) {
         return null;
       }
       node = node.return;
     }
     node = node.sibling;
+    // 如果node不是可插入fiber(是组件对应的fiber,没有真实DOM),则查找该fiber下可插入DOM的fiber
     while (node.tag !== HostComponent && node.tag !== HostText) {
       console.log(11);
       // 如果兄弟节点是组件,需要插入则找兄弟的兄弟,否则找组件的子fiber
@@ -206,7 +209,7 @@ function commitHookPassiveUnmountEffects(finishedWork, hookFlags) {
   commitHookEffectListUnmount(hookFlags, finishedWork);
 }
 function commitHookEffectListUnmount(flags, finishedWork) {
-  // 真正执行的地方
+  // 销毁函数真正执行的地方
   const updateQueue = finishedWork.updateQueue;
   const lastEffect = updateQueue !== null ? updateQueue.lastEffect : null;
   if (lastEffect !== null) {

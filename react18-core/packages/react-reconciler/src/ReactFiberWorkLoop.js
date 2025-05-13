@@ -33,7 +33,10 @@ import {
 } from "./ReactFiberCommitWork";
 import { finishQueueingConcurrentUpdates } from "./ReactFiberConcurrentUpdates";
 import { NoFlags, MutationMask, Passive } from "./ReactFiberFlags";
-import { flushSyncCallbacks } from "./ReactFiberSyncTaskQueue";
+import {
+  flushSyncCallbacks,
+  scheduleSyncCallback,
+} from "./ReactFiberSyncTaskQueue";
 
 // 上一个工作fiber
 let workInProgressRoot = null;
@@ -164,6 +167,7 @@ function renderRootSync(FiberRoot, nextLanes) {
   workLoopSync();
 }
 function workLoopConcurrent() {
+  // 判断任务中断执行的关键
   while (workInProgress !== null && !shouldYield()) {
     performUnitOfWork(workInProgress);
   }
@@ -246,7 +250,7 @@ function commitWork(FiberRoot) {
     // 需要执行副作用
     if (!rootDoesHavePassiveEffect) {
       rootDoesHavePassiveEffect = true;
-      scheduleCallback(NormalSchedulerPriority, flushPassiveEffect);
+      Scheduler_scheduleCallback(NormalSchedulerPriority, flushPassiveEffect); //通过调度执行副作用
     }
   }
 
@@ -255,7 +259,7 @@ function commitWork(FiberRoot) {
   // 进行更新
   if (rootHasEffect || subtreeHasEffect) {
     commitMutationEffectsOnFiber(finishedWork, FiberRoot);
-    commitLayoutEffects(finishedWork, FiberRoot); // 触发useLayout
+    commitLayoutEffects(finishedWork, FiberRoot); // 执行执行layout副作用
     if (rootDoesHavePassiveEffect) {
       rootDoesHavePassiveEffect = false;
       rootWithPendingPassiveEffects = FiberRoot;

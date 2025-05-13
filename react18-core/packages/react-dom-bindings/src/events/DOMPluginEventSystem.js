@@ -109,7 +109,6 @@ export function accumulateSinglePhaseListeners(
   let fiber = targetFiber;
   const listeners = [];
   while (fiber !== null) {
-    console.log(1);
     const { stateNode, tag } = fiber;
     if (tag === HostComponent && stateNode !== null) {
       const listener = getListenerByNameFormFiber(fiber, reactEventName);

@@ -53,7 +53,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     let preFiberChild = null;
     let index = 0;
 
-    // 第一套方案:同序比较
+    // 第一种情况:从前往后,同序比较
     let oldFiber = currentFirstFiber;
     let nextOldFiber = null;
     let lastPlaceIndex = 0; //记录当前最后一个不移动的fiber,用来判断之后的fiber是否需要移动
@@ -87,13 +87,13 @@ function createChildReconciler(shouldTrackSideEffects) {
 
       oldFiber = nextOldFiber; // 保持和vnodeArray遍历同序
     }
-    // 新节点比较完毕
+    // 第二种情况: 新节点比较完毕,删除其他旧节点
     if (index === nextChildren.length) {
       deleteRemainingChildren(returnFiber, oldFiber);
       return firstFiberChild;
     }
 
-    // 第二套方案
+    // 第三种情况: 老节点比较完毕,创建剩余的新vnode为fiber
     if (oldFiber === null) {
       //说明,oldFiber已经遍历完毕了,剩下的vnode需要直接创建
       for (; index < nextChildren.length; index++) {
@@ -111,7 +111,7 @@ function createChildReconciler(shouldTrackSideEffects) {
       }
     }
 
-    // 第三套方案,到这里oldFiber和vnode都没比较完
+    // 第四种情况: 新vnode和旧fiber都没有比较完毕
     // 1.构建oldFiber的key与oldFiber映射
     const oldFiberKeyToOldFiberMap = mapRemainingChildren(oldFiber);
     for (; index < nextChildren.length; index++) {
@@ -185,7 +185,6 @@ function createChildReconciler(shouldTrackSideEffects) {
     const map = new Map();
     let fiber = oldFiber;
     while (fiber !== null) {
-      console.log(3);
       const key = fiber.key || fiber.index;
       map.set(key, fiber);
       fiber = fiber.sibling;
@@ -256,7 +255,6 @@ function createChildReconciler(shouldTrackSideEffects) {
     // 转换之前,先diff:单个新虚拟DOM节点
     let oldFiber = currentFirstFiber;
     while (oldFiber !== null) {
-      console.log(4);
       const isSameKey = currentFirstFiber.key === nextChildren.key;
       if (isSameKey) {
         const isSameType = currentFirstFiber.type === nextChildren.type;
@@ -311,7 +309,6 @@ function createChildReconciler(shouldTrackSideEffects) {
     }
     let fiber = oldFiber;
     while (fiber !== null) {
-      console.log(5);
       deleteFiber(workInProgress, fiber);
       fiber = fiber.sibling;
     }
